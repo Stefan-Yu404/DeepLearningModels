@@ -1,0 +1,27 @@
+<!-- In Essentail goal, we want to find the paintings from Munch among the painting from Monet and Van Gohh.
+An the corresponding datasets are:
+Van Gogh: https://www.kaggle.com/datasets/ipythonx/van-gogh-paintings
+Monet: https://www.kaggle.com/datasets/soufianeao/gtacityscapestf  
+  
+  
+Desired goal #2: 
+For the task of disentangling the target painter's style from the works of others including Van Gogh and Monet, we prefer to use CNN or some updated CNN models to do classification by labelling the data. However, it may lead us to mode collapse and we will try to figure it out.
+
+As for the GAN model, now we prefer to use cycleGAN, which is a model that includes a cycle consistency. Because GAN tends to use pair-to-pair data (like pix2pix model), though this kind of data can make the result better, it is not easy to obatin, especially for the artistic pieces. In addition, many GAN models just try to find the distribution of the prediction without building the conections between a particular image to the corresponding output. With CyleGAN, we consider a cycle consistency or regularization, we add it to traditional GAN loss. Then the loss:  
+$V(D,G) = min_{G}max_{D} L(D,G) = E_{x~p_r(x)}\[log(D(x))\] + E_{x~p_z(z)}\[log(1 - D(G(z))\]$
+$L(G, F) = E_{x~p_r(x)}\[F(G(x)) - x||_1\] + E_{x~p_r(y)}\[||G(F(y)) - y||_1\]$ (For G: X->Y, F: Y->X)
+Then all we need is to optimize L(G, F, D_x, D_y), we may still have to do some more changes to this loss function(D_y is to compare G(x) and y, D_x is to compare F(y) and x.). In this way, we can generate a particular corresponding to the input. After assuming the loss, we may evaluate it using AMT perceptual studies or FCN score. -->
+
+
+
+For essential goal #1 and desired #1: For the purpose of differentiating Munch's style from others', we decide to include Van Gogh's painting dataset: (https://www.kaggle.com/datasets/ipythonx/van-gogh-paintings) as a distinct style so that the model may gives a binary prediction whether the image is Munch's or not.
+<!-- 
+For desired goal #2: As the object to transform, natural image (https://www.kaggle.com/datasets/prasunroy/natural-images) is included in our modelling process. Since the original GAN structure can only generate image that is similar to certain type and require paired images, we intend to implement the CycleGAN structure to achieve unpaired image transformation. Simply put, CycleGAN architecture includes two GAN, i.e, two generator and two discriminator. Considering a pair of image (A,B), one GAN transforms image A to B and another transforms B to A. A specific loss, cycle consistency loss, is introduced to control the performance of whole cycle. Previous research has shown that this architecture can extract certain 'style' and then apply to general images while retaining the content.   -->
+
+For desired goal #2: As the object to transform, natural image (https://www.kaggle.com/datasets/prasunroy/natural-images) is included in our modelling process. Since the original GAN structure can only generate image that is similar to certain type and prefer paired images, we intend to implement the CycleGAN structure to achieve unpaired image transformation. Simply put, CycleGAN architecture includes two GAN, i.e, two generator and two discriminator, and each are trained in typical GAN loss. Considering a pair of image (A,B) with different content and style, one GAN transforms image A to B and another transforms B to A. A novel loss, cycle consistency loss, is introduced to control the performance of whole cycle. Previous research has shown that this architecture can extract certain 'style' and then apply to general images while retaining the content.
+
+For the sake of evaluating the transfered style, there are many criterions, including most used IS(Inception Score), FID(Fréchet Inception Distance), Wasserstein Distance and GANtrain and GANtest. For the reason that we haven't come to that point, we are not really sure which evaluation we will finally use, we may also combine some of them or try some new evaluaion methods according to the result and anlysis.
+
+(To explain it and be more specifically about the loss function, consider a simple one.(G and F are the generators and D is the discriminator) For the input set X, $D_Y$ is to compare Y and G(X). And for the inverse, Y act as input set and $D_X$ is to compare X and F(Y). The function of G,F, $D_X$, $D_Y$ consitute the first term of the loss function. As for the second term, we implement the cycle consistency, which acts like a regularization. For a input x, compare the distance between x and F(G(x)), if we want to make the relation more important, we can increase the weight of the cycle consistency in the loss term. If we want to turn a picture to the style of Muncle, we may have to do some more complex transformations in the following steps.)
+
+After looking into essential goal #2, we realize that there are several ways to address this problem. First, we will try transformations like resize, crop (which seem to make less sense in regard to our problem) and zero-padding. Since CNN only require same size input for the fully connected layers, we can also try to add a Global Average Pooling or Global Max Pooling layer before the fully connected layers. However some argues that In this way we don't loose information neither add noise, which happens with resizing while some believes it's always benifitial to have images be same size. So we'll try both and and see which performs better. 

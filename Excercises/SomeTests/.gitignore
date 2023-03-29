@@ -1,0 +1,7 @@
+__pycache__/
+.DS_Store
+hw1-*/
+
+*.swp
+
+backup
